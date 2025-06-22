@@ -1,0 +1,62 @@
+.instagram-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #ffffff;
+  border-top: 1px solid #dbdbdb;
+  z-index: 1000;
+  padding: 10px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.footer-nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+  max-width: 500px;
+  padding: 0 20px;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: #262626;
+  font-size: 12px;
+  transition: color 0.2s ease;
+}
+
+.nav-item:hover,
+.nav-item:focus {
+  color: #0095f6;
+  outline: none;
+}
+
+.nav-item svg {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 4px;
+}
+
+.icon-home,
+.icon-search,
+.icon-upload,
+.icon-notifications,
+.icon-profile {
+  stroke: #262626;
+}
+
+.nav-item:hover svg,
+.nav-item:focus svg {
+  stroke: #0095f6;
+}
+
+@media (min-width: 768px) {
+  .instagram-footer {
+    display: none; /* Hide footer on larger screens if desired */
+  }
+}
