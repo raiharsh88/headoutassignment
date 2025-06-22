@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import Webcam, { WebcamProps } from 'react-webcam';
 import '../css/base.css';
 import { JsxElement, JsxEmit } from 'typescript';
+import Footer from '@/components/footer/footer';
 
 type MakeOptional<T> = {
   [K in keyof T]?: T[K];
@@ -74,6 +75,7 @@ console.log('Hello')
           </>
         )}
       </header>
+      <Footer/>
     </div>
   );
 }

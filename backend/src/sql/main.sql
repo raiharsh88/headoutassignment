@@ -19,6 +19,7 @@ create table if not exists users(
     updated_at timestamptz default now(),
     primary key(id)
 );
+
 create table if not exists action_logs(
     id varchar(255),
     action varchar(20),

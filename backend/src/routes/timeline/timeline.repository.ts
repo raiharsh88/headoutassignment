@@ -21,7 +21,9 @@ export class TimelineRepository {
 
     async get(page: number, limit: number = 20): Promise<PostResponse[]> {
         const offset = (page - 1) * limit;
+        console.log(offset, limit)
         const query = this.commonPostQuery() + ` LIMIT $1 OFFSET $2`
+        console.log(query)
         const result = await this.connection?.query(query, [limit, offset]);
         return result?.rows as PostResponse[];
     }
@@ -33,12 +35,16 @@ export class TimelineRepository {
     }
 
     async patch(postId: string, userId: string, action: string, meta: any = {}) {
-        const query = `INSERT INTO action_logs (action, user_id, post_id, metadata)
+        const query = `INSERT INTO action_logs (action, user_id, post_id,is_true)
                        VALUES ($1, $2, $3, $4)
                         on conflict (action , user_id , post_id)
-                        do update set is_true = not action_logs.is_true
+                        do update set is_true = (
+                        case when action_logs.is_true
+                            then false
+                            else true
+                            end)
                         `;
-        await this.connection?.query(query, [action, userId, postId, meta]);
+        await this.connection?.query(query, [action, userId, postId,true]);
     }
     async post(postId: string, file_name: string, user_id: string,caption:string, buffer:any,mime_type:string) {
         const blobName = `${directoryPrefix}${file_name}`;
@@ -67,23 +73,25 @@ export class TimelineRepository {
     }
 
     private commonPostQuery(postId?:string){
-        return `SELECT p.*, 
+        return `SELECT  p.id,p.caption, p.user_id, p.file_path, p.file_type, p.created_at,p.updated_at, 
         sum(
             case when al.action = 'likes' and al.is_true
                 then 1
                 else 0
+                end
             ) as likes ,
         sum(
         case when al.action = 'shares'  and al.is_true
             then 1
             else 0
+            end
             ) as shares 
         FROM posts p 
     `
     + (postId?` where p.id = $1`:'') +
     `
-    join action_logs al on al.post_id = p.id 
-    group by p.id,p.caption, p.user_id, p.file_path, p.file_type, p.created_at, p.metadata,p.updated_at
+    left join action_logs al on al.post_id = p.id 
+    group by p.id,p.caption, p.user_id, p.file_path, p.file_type, p.created_at,p.updated_at
     order by p.created_at desc`;
     }
 

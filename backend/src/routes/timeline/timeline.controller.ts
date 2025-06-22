@@ -32,13 +32,14 @@ router.get('/:postId', async (req, res) => {
 
 router.get('/', async (req, res) => {
     try {
-        const { limit, page } = req.body;
+        const { limit, page } = req.query  as any;
         const respone = await timelineService.get(page, limit)
 
         res.json({
             data: respone,
         })
     } catch (e) {
+        console.log('Eror',e)
         res.status(500).json({ error: 'server error' })
 
     }
@@ -53,8 +54,8 @@ router.patch('/', async (req, res) => {
             data: respone,
         })
     } catch (e) {
+        console.log('Eror',e)
         res.status(500).json({ error: 'server error' })
-
     }
 })
 

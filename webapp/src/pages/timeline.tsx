@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
+import Footer from "@/components/footer/footer";
 
 const API_ENDPOINT = `${process.env.API_BASE_URL}/api/v1/timeline`; // Adjust based on your actual API endpoint
 
@@ -19,7 +20,6 @@ export default function TimeLine(props: any) {
         setLoading(true);
         setError(null);
         try {
-            console.log(API_ENDPOINT)
             const response = await axios.get(API_ENDPOINT, {
                 params: {
                     page,
@@ -46,9 +46,50 @@ export default function TimeLine(props: any) {
     const handlePageChange = (newPage: number) => {
         if (newPage >= 1 && newPage <= totalPages) {
             setPage(newPage);
-        }
+        };
     };
 
+    async function likePost(postId:string){
+        const userData = JSON.parse((localStorage.getItem('userData') || "{}")) as any
+        console.log(userData)
+
+        const response = await axios.patch(API_ENDPOINT, {
+                       userId:userData.username,
+                       postId:postId,
+                       action:'likes'
+                    });
+        alert('you liked the post')
+
+        setPosts(
+            posts.map((post) => {
+                if (post.id === postId) {
+                    return { ...post, likes: Number(post.likes) + 1 };
+                }
+                return post;
+            })
+        )
+    }
+
+    async function sharePost(postId:string,filePath:string){
+        const userData = JSON.parse((localStorage.getItem('userData') || "{}")) as any
+        const response = await axios.patch(API_ENDPOINT, {
+                       userId:userData.username,
+                       postId:postId,
+                       action:'shares'
+                    })
+        posts.map((post) => {
+            if (post.id === postId) {
+                return { ...post, shares: Number(post.shares) + 1 };
+            }
+            return post;
+        })
+        navigator.clipboard.writeText(filePath);
+
+        // copy user to clipboard
+
+        
+        alert('copied to clipboard');
+    }
     return (
         <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
             <h1>Timeline</h1>
@@ -59,17 +100,20 @@ export default function TimeLine(props: any) {
                 <div>
                     {posts.map((post, index) => (
                         <div key={post.id || index} style={{ border: '1px solid #ddd', padding: '10px', marginBottom: '10px', borderRadius: '5px' }}>
-                            <h3>{post.title || 'Untitled Post'}</h3>
-                            {post.image && (
+                            {post.file_path && (
                                 <img 
-                                    src={post.image} 
+                                    src={post.file_path} 
                                     alt="Post content" 
                                     style={{ maxWidth: '100%', height: 'auto', marginBottom: '10px' }} 
                                 />
                             )}
-                            <p>{post.content || 'No content available.'}</p>
-                            <small>Posted on: {post.date || 'Unknown date'}</small>
-                        </div>
+                            <p>{post.caption || 'No content available.'}</p>
+                            <small>Posted on: {post.created_at || 'Unknown date'}</small>
+
+                            <button  onClick={() => likePost(post?.id)}>Likes {post.likes}</button> 
+                            <button  onClick={() => sharePost(post?.id,post.file_path)}>Shares {post.shares}</button>
+
+                                                    </div>
                     ))}
                     <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
                         <button 
@@ -90,6 +134,8 @@ export default function TimeLine(props: any) {
                     </div>
                 </div>
             )}
+
+            <Footer/>
         </div>
     );
 }
